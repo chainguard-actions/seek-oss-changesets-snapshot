@@ -1,0 +1,34 @@
+name: Test default outputs are set
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-github-token
+          NPM_TOKEN: fake-npm-token
+      - name: Assert published output is set to false by default
+        env:
+          PUBLISHED: ${{ steps.action.outputs.published }}
+        run: |
+          echo "published: $PUBLISHED"
+          if [ "$PUBLISHED" != "false" ]; then
+            echo "FAIL: expected published output to be 'false', got '$PUBLISHED'"
+            exit 1
+          fi
+          echo "PASS: published output is correctly set to 'false'"
+      - name: Assert publishedPackages output is set to empty array by default
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.action.outputs.publishedPackages }}
+        run: |
+          echo "publishedPackages: $PUBLISHED_PACKAGES"
+          if [ "$PUBLISHED_PACKAGES" != "[]" ]; then
+            echo "FAIL: expected publishedPackages output to be '[]', got '$PUBLISHED_PACKAGES'"
+            exit 1
+          fi
+          echo "PASS: publishedPackages output is correctly set to '[]'"

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "outDir": "dist",
+    "removeComments": false,
+    "target": "ES2020",
+    "types": ["@types/node", "@types/jest"]
+  },
+  "exclude": ["./node_modules", "dist*/**/*"],
+  "extends": "skuba/config/tsconfig.json"
+}
