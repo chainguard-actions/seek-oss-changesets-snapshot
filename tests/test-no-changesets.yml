@@ -1,0 +1,37 @@
+name: Test - No Changesets Found
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token-for-testing
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install @changesets/cli
+        run: npm install --save-dev @changesets/cli
+        working-directory: ${{ github.workspace }}
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-token-for-testing
+          GITHUB_REF: refs/heads/main
+
+      - name: Assert published output is false
+        env:
+          PUBLISHED: ${{ steps.action.outputs.published }}
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "published: $PUBLISHED"
+          # With no changesets committed, the action should output published=false
+          # (it detects "No unreleased changesets found" and skips publishing)
+          if [ "$PUBLISHED" = "true" ]; then
+            echo "FAIL: expected published to be false (no changesets present)"
+            exit 1
+          fi
+          echo "PASS: published is not true as expected when no changesets are present"

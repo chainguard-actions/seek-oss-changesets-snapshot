@@ -1,0 +1,92 @@
+{
+  "name": "changesets-snapshot",
+  "version": "0.3.2",
+  "private": false,
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "@seek/changesets-snapshot/source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "skuba build-package",
+    "changeset": "changeset",
+    "format": "skuba format",
+    "lint": "skuba lint",
+    "release": "node ./scripts/release.ts",
+    "test": "vitest --run",
+    "test:ci": "vitest --run --coverage",
+    "test:watch": "skuba test --watch"
+  },
+  "devDependencies": {
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/github": "^9.0.0",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.26.0",
+    "@manypkg/get-packages": "^3.1.0",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "4.1.0",
+    "package-manager-detector": "^1.6.0",
+    "resolve-from": "^5.0.0",
+    "skuba": "15.3.0",
+    "vitest": "^4.1.0"
+  },
+  "packageManager": "pnpm@10.30.1",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    }
+  },
+  "inlinedDependencies": {
+    "@actions/core": "3.0.0",
+    "@actions/exec": "3.0.0",
+    "@actions/github": "9.0.0",
+    "@actions/http-client": [
+      "3.0.2",
+      "4.0.0"
+    ],
+    "@actions/io": "3.0.2",
+    "@manypkg/find-root": "3.1.0",
+    "@manypkg/get-packages": "3.1.0",
+    "@manypkg/tools": "2.1.0",
+    "@octokit/auth-token": "6.0.0",
+    "@octokit/core": "7.0.6",
+    "@octokit/endpoint": "11.0.3",
+    "@octokit/graphql": "9.0.3",
+    "@octokit/plugin-paginate-rest": "14.0.0",
+    "@octokit/plugin-rest-endpoint-methods": "17.0.0",
+    "@octokit/request": "10.0.8",
+    "@octokit/request-error": "7.1.0",
+    "before-after-hook": "4.0.0",
+    "fast-content-type-parse": "3.0.0",
+    "fdir": "6.5.0",
+    "jju": "1.4.0",
+    "js-yaml": "4.1.1",
+    "json-with-bigint": "3.5.7",
+    "package-manager-detector": "1.6.0",
+    "picomatch": "4.0.3",
+    "resolve-from": "5.0.0",
+    "tinyglobby": "0.2.15",
+    "tunnel": "0.0.6",
+    "undici": "6.23.0",
+    "universal-user-agent": "7.0.3"
+  },
+  "skuba": {
+    "entryPoint": "src/index.ts",
+    "template": null,
+    "type": "package",
+    "version": "15.3.0"
+  }
+}

@@ -1,0 +1,46 @@
+name: Test - Pre-version Input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token-for-testing
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install @changesets/cli
+        run: npm install --save-dev @changesets/cli
+        working-directory: ${{ github.workspace }}
+
+      - name: Create pre-version marker file target directory
+        run: mkdir -p /tmp/test-markers
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-token-for-testing
+          GITHUB_REF: refs/heads/main
+        with:
+          pre-version: touch /tmp/test-markers/pre-version-ran
+
+      - name: Assert pre-version script ran
+        run: |
+          if [ ! -f /tmp/test-markers/pre-version-ran ]; then
+            echo "FAIL: pre-version script did not run (marker file not found)"
+            exit 1
+          fi
+          echo "PASS: pre-version script ran as expected"
+
+      - name: Assert published is false (no changesets)
+        env:
+          PUBLISHED: ${{ steps.action.outputs.published }}
+        run: |
+          echo "published: $PUBLISHED"
+          if [ "$PUBLISHED" = "true" ]; then
+            echo "FAIL: expected published to be false (no changesets present)"
+            exit 1
+          fi
+          echo "PASS: published is not true as expected"
