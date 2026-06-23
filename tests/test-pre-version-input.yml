@@ -1,0 +1,40 @@
+name: Test - Pre-version Input
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token-for-testing
+      GITHUB_REF: refs/heads/feature-branch
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+
+      - name: Prepare pre-version marker
+        run: rm -f /tmp/pre-version-ran
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          # Use a simple command without shell redirection — the action splits
+          # the script by whitespace and runs it directly (no shell involved).
+          pre-version: touch /tmp/pre-version-ran
+        env:
+          GITHUB_TOKEN: fake-token-for-testing
+          GITHUB_REF: refs/heads/feature-branch
+
+      - name: Assert pre-version script ran
+        run: |
+          echo "Checking for pre-version marker file..."
+          if [ ! -f /tmp/pre-version-ran ]; then
+            echo "FAIL: expected pre-version script to have run (marker file not found)"
+            exit 1
+          fi
+          echo "PASS: pre-version script ran as expected (marker file exists)"

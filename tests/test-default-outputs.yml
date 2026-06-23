@@ -1,0 +1,40 @@
+name: Test - Default Outputs
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token-for-testing
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: fake-token-for-testing
+          GITHUB_REF: refs/heads/main
+
+      - name: Assert published output defaults to false
+        env:
+          PUBLISHED: ${{ steps.action.outputs.published }}
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "published: $PUBLISHED"
+          # The action sets published=false as its very first operation,
+          # so even if it fails later (e.g. missing @changesets/cli),
+          # the output should be 'false'
+          if [ "$PUBLISHED" != "false" ]; then
+            echo "FAIL: expected published to be 'false', got: '$PUBLISHED'"
+            exit 1
+          fi
+          echo "PASS: published output is false as expected"

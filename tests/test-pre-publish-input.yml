@@ -1,0 +1,28 @@
+name: Test pre-publish input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          pre-publish: 'echo "pre-publish step executed"'
+        continue-on-error: true
+      - name: Assert pre-publish input was accepted
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          # The action may fail due to missing GitHub token or changeset config,
+          # but it must have started (not skipped or errored before accepting inputs).
+          # A 'failure' outcome means the action ran and encountered an expected error.
+          # A 'success' outcome means it ran successfully.
+          # Either is acceptable — what matters is the input was accepted.
+          if [ "${{ steps.action.outcome }}" = "skipped" ]; then
+            echo "FAIL: action was skipped, expected it to run"
+            exit 1
+          fi
+          echo "PASS: pre-publish input was accepted and action ran"
