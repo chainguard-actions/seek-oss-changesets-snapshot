@@ -1,20 +1,46 @@
-name: Test pre-publish input
+name: Test - pre-publish Input Runs Before Publish Command
 on:
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: dummy-token
+      CI: true
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
-        uses: .
         with:
-          pre-publish: 'echo "pre-publish step executed"'
-        continue-on-error: true
-      - name: Assert action ran with pre-publish input
+          fetch-depth: 0
+
+      - name: Install pnpm
+        run: npm install -g pnpm@10.30.1
+
+      - name: Install dependencies (including @changesets/cli)
+        run: pnpm install --frozen-lockfile
+
+      - name: Run action with pre-publish script
+        id: action
+        uses: .
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          pre-publish: "touch /tmp/pre-publish-ran"
+
+      - name: Assert pre-publish script ran
         run: |
-          echo "Action completed (with or without publishing)"
-          echo "published: ${{ steps.action.outputs.published }}"
-          echo "PASS: pre-publish input was accepted by the action"
+          if [ ! -f /tmp/pre-publish-ran ]; then
+            echo "FAIL: pre-publish script did not run (marker file not found)"
+            exit 1
+          fi
+          echo "PASS: pre-publish script ran successfully"
+
+      - name: Assert action completed (published=false since no changesets)
+        env:
+          PUBLISHED: ${{ steps.action.outputs.published }}
+        run: |
+          echo "published: $PUBLISHED"
+          if [ "$PUBLISHED" = "true" ]; then
+            echo "FAIL: expected published=false (no changesets) but got published=true"
+            exit 1
+          fi
+          echo "PASS: action completed with published=false as expected"
