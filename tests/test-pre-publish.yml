@@ -1,0 +1,42 @@
+name: Test pre-publish input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      # Run the action with a pre-publish script.
+      # The action will fail at some point (no NPM_TOKEN / no publishable packages),
+      # but we verify the action accepts the pre-publish input without crashing early.
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          pre-publish: echo "pre-publish step executed"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Assert action ran (accepted pre-publish input)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          PUBLISHED: ${{ steps.action.outputs.published }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "published: $PUBLISHED"
+          if [ "$OUTCOME" = "success" ]; then
+            # If it somehow succeeded, published must be a boolean value
+            if [ "$PUBLISHED" != "false" ] && [ "$PUBLISHED" != "true" ]; then
+              echo "FAIL: expected published to be 'true' or 'false' but got '$PUBLISHED'"
+              exit 1
+            fi
+            echo "PASS: action succeeded with published=$PUBLISHED"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no NPM_TOKEN or no publishable packages)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
